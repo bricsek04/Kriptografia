@@ -7,17 +7,25 @@ def main():
     q = 17
     a = 2
     b = 2
-    P = (5,1)
+    G = (5,1)
+
+    if not rajta_van_e(G, a, b, q):
+        print("A generátorpont nincs rajta a görbén.")
+        return
 
     privat_kulcs = 13
-    publikus_kulcs = skalarral_szorzas(privat_kulcs, P, a, q)
+    publikus_kulcs = skalarral_szorzas(privat_kulcs, G, a, q)
 
     üzenet = (10, 6)
+
+    if not rajta_van_e(üzenet, a, b, q):
+        print("Az üzenetpont nincs rajta a görbén.")
+        return
 
     print(f"eredeti_üzenet: {üzenet}")
     print(f"publikus_kulcs: {publikus_kulcs}")
 
-    C1, C2 = titkositas(üzenet, publikus_kulcs, P, a, q, n=19)
+    C1, C2 = titkositas(üzenet, publikus_kulcs, G, a, q, n=19)
 
     print(f"titkos_üzenet_C1: {C1}")
     print(f"titkos_üzenet_C2: {C2}")

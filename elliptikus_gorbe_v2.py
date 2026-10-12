@@ -53,10 +53,10 @@ def skalarral_szorzas(k, P, a, q):
 
     return R
 
-def titkositas(üzenet, publikus_kulcs, P, a, q, n):
+def titkositas(üzenet, publikus_kulcs, G, a, q, n):
     r = random.randint(1, n-1)
 
-    C1 = skalarral_szorzas(r, P, a ,q)
+    C1 = skalarral_szorzas(r, G, a ,q)
 
     kozos_titok = skalarral_szorzas(r, publikus_kulcs, a, q)
 
