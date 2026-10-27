@@ -1,4 +1,5 @@
 import random
+import hashlib
 
 def rajta_van_e(P, a, b, q):
     if P is None: return True
@@ -72,3 +73,36 @@ def visszafejtes(C1, C2, privat_kulcs, a, q):
     üzenet = pontosszeadas(C2, kozos_titok_inverz, a, q)
     
     return üzenet
+
+def schnorr_hash(R, uzenet, n):
+    adat = f"{R[0]},{R[1]},{uzenet}".encode()
+    teljes_hash = int(hashlib.sha256(adat).hexdigest(), 16)
+    return teljes_hash % n
+
+def schnorr_alairas(uzenet, privat_kulcs, G, a, q, n):
+    while True:
+        k = random.randint(1, n - 1)
+        R = skalarral_szorzas(k, G, a, q)
+        if R is None:
+            continue
+        e = schnorr_hash(R, uzenet, n)
+        if e == 0:
+            continue
+        s = (k - privat_kulcs * e) % n
+        if s != 0:
+            return (e, s)
+
+def schnorr_ellenorzes(uzenet, alairas, publikus_kulcs, G, a, q, n):
+    e, s = alairas
+    if not (1 <= e < n and 1 <= s < n):
+        return False
+
+    P1 = skalarral_szorzas(s, G, a, q)
+    P2 = skalarral_szorzas(e, publikus_kulcs, a, q)
+    R_v = pontosszeadas(P1, P2, a, q)
+
+    if R_v is None:
+        return False
+
+    e_v = schnorr_hash(R_v, uzenet, n)
+    return e == e_v
