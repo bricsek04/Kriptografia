@@ -1,7 +1,7 @@
 import hashlib
 import json
 import time
-from elliptikus_gorbe_v2 import schnorr_alairas, schnorr_ellenorzes
+from elliptikus_gorbe_v2 import ecdsa_alairas, ecdsa_ellenorzes
 
 def blokk_hash(blokk):
     string_blokk = json.dumps(blokk, sort_keys=True).encode()
@@ -26,7 +26,7 @@ def banyaszat(blokk, nehezseg):
 
 def tranzakcio_kuldese(kuldo, fogado, osszeg, privat_kulcs, publikus_kulcs, G, a, q, n):
     uzenet = f"{kuldo}->{fogado}:{osszeg}"
-    alairas = schnorr_alairas(uzenet, privat_kulcs, G, a, q, n)
+    alairas = ecdsa_alairas(uzenet, privat_kulcs, G, a, q, n)
     return {
         "kuldo": kuldo,
         "fogado": fogado,
@@ -37,7 +37,7 @@ def tranzakcio_kuldese(kuldo, fogado, osszeg, privat_kulcs, publikus_kulcs, G, a
 
 def tranzakcio_ellenorzese(tranzakcio, G, a, q, n):
     uzenet = f"{tranzakcio['kuldo']}->{tranzakcio['fogado']}:{tranzakcio['osszeg']}"
-    return schnorr_ellenorzes(
+    return ecdsa_ellenorzes(
         uzenet,
         tranzakcio["alairas"],
         tranzakcio["publikus_kulcs"],

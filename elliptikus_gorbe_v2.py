@@ -74,35 +74,42 @@ def visszafejtes(C1, C2, privat_kulcs, a, q):
     
     return üzenet
 
-def schnorr_hash(R, uzenet, n):
-    adat = f"{R[0]},{R[1]},{uzenet}".encode()
-    teljes_hash = int(hashlib.sha256(adat).hexdigest(), 16)
+def ecdsa_hash(uzenet, n):
+    teljes_hash = int(hashlib.sha256(uzenet.encode()).hexdigest(), 16)
     return teljes_hash % n
 
-def schnorr_alairas(uzenet, privat_kulcs, G, a, q, n):
+def ecdsa_alairas(uzenet, privat_kulcs, G, a, q, n):
+    z = ecdsa_hash(uzenet, n)
+
     while True:
         k = random.randint(1, n - 1)
         R = skalarral_szorzas(k, G, a, q)
         if R is None:
             continue
-        e = schnorr_hash(R, uzenet, n)
-        if e == 0:
+
+        r = R[0] % n
+        if r == 0:
             continue
-        s = (k - privat_kulcs * e) % n
+
+        s = (pow(k, -1, n) * (z + r * privat_kulcs)) % n
         if s != 0:
-            return (e, s)
+            return (r, s)
 
-def schnorr_ellenorzes(uzenet, alairas, publikus_kulcs, G, a, q, n):
-    e, s = alairas
-    if not (1 <= e < n and 1 <= s < n):
+def ecdsa_ellenorzes(uzenet, alairas, publikus_kulcs, G, a, q, n):
+    r, s = alairas
+    if not (1 <= r < n and 1 <= s < n):
         return False
 
-    P1 = skalarral_szorzas(s, G, a, q)
-    P2 = skalarral_szorzas(e, publikus_kulcs, a, q)
-    R_v = pontosszeadas(P1, P2, a, q)
+    z = ecdsa_hash(uzenet, n)
+    w = pow(s, -1, n)
+    u1 = (z * w) % n
+    u2 = (r * w) % n
 
-    if R_v is None:
+    P1 = skalarral_szorzas(u1, G, a, q)
+    P2 = skalarral_szorzas(u2, publikus_kulcs, a, q)
+    P = pontosszeadas(P1, P2, a, q)
+
+    if P is None:
         return False
 
-    e_v = schnorr_hash(R_v, uzenet, n)
-    return e == e_v
+    return (P[0] % n) == r
